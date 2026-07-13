@@ -1,0 +1,39 @@
+\documentclass{spanishcards}
+
+\SpanishCardsSetup{
+  theme = mediterranean,
+  mode = study,
+  answer-style = lines,
+  show-card-number = true
+}
+
+\begin{document}
+
+\AddSpanishWord{
+  spanish = {la sobremesa},
+  english = {after-meal conversation},
+  chinese = {餐后闲谈},
+  pos = {sustantivo},
+  gender = {f.},
+  pronunciation = {/la soβɾeˈmesa/},
+  example-es = {Disfrutamos de una larga sobremesa.},
+  example-en = {We enjoyed a long after-meal conversation.},
+  example-zh = {我们愉快地聊了很久。},
+  level = {B1},
+  tags = {{cultura, vida diaria}},
+  color = {mediterranean}
+}
+
+\LoadSpanishCSV{data/example.csv}
+\LoadSpanishJSON{data/example.json}
+
+\PrintVocabularyCards
+
+\SpanishCardsSetup{
+  mode = quiz-english,
+  answer-style = lines,
+  hide = {}
+}
+\PrintVocabularyTable
+
+\end{document}

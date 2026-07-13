@@ -1,0 +1,28 @@
+[
+  {
+    "spanish": "acogedor",
+    "english": "cozy",
+    "chinese": "舒适温馨的",
+    "pos": "adjetivo",
+    "pronunciation": "/akoχeˈðoɾ/",
+    "example_es": "Este café es muy acogedor.",
+    "example_en": "This café is very cozy.",
+    "example_zh": "这家咖啡馆非常温馨。",
+    "level": "A2",
+    "tags": "lugares, ambiente",
+    "color": "mint"
+  },
+  {
+    "spanish": "aprovechar",
+    "english": "to make the most of",
+    "chinese": "充分利用",
+    "pos": "verbo",
+    "pronunciation": "/apɾoβeˈtʃaɾ/",
+    "example_es": "Vamos a aprovechar el día.",
+    "example_en": "Let us make the most of the day.",
+    "example_zh": "让我们充分利用这一天。",
+    "level": "B1",
+    "tags": "vida diaria",
+    "color": "mediterranean"
+  }
+]

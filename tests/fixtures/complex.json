@@ -1,0 +1,30 @@
+[
+  {
+    "spanish": "el corazón",
+    "english": "heart",
+    "chinese": "心脏",
+    "pos": "sustantivo",
+    "gender": "m.",
+    "pronunciation": "/el koɾaˈson/",
+    "example_es": "El corazón late.",
+    "example_en": "The heart beats.\nEvery day.",
+    "example_zh": "心脏每天跳动。",
+    "level": 2,
+    "tags": true,
+    "color": "mediterranean",
+    "notes": {"ignored": true}
+  },
+  {
+    "spanish": "ma\u00f1ana",
+    "english": "tomorrow",
+    "chinese": "明天",
+    "pos": "adverbio",
+    "pronunciation": null,
+    "example_es": "Nos vemos ma\u00f1ana.",
+    "example_en": "See you tomorrow.",
+    "example_zh": "明天见。",
+    "level": "A1",
+    "tags": "tiempo",
+    "color": "ocean"
+  }
+]

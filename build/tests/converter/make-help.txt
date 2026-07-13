@@ -1,0 +1,34 @@
+make[1]: Entering directory '/home/yyt/Documents/xiyu'
+SpanishCards build commands
+
+  make help
+      Show this help.
+
+  make test
+      Run the complete test suite.
+
+  make pdf
+      Compile example.tex with LuaLaTeX and update example.pdf.
+
+  make convert-json INPUT=... OUTPUT=... FORMAT=fragment VIEW=cards
+      Convert one JSON file. FORMAT: fragment|document.
+      VIEW: cards|table (used by document format).
+
+  make json-fragments
+      Convert data/*.json to generated/fragments/*.tex.
+
+  make json-documents
+      Convert data/*.json to generated/documents/*.tex.
+
+  make clean
+      Remove build files, generated TeX, and LaTeX auxiliaries.
+
+  make distclean
+      Run clean and also remove example.pdf.
+
+Defaults:
+  INPUT=data/example.json
+  OUTPUT=generated/custom.tex
+  FORMAT=fragment
+  VIEW=cards
+make[1]: Leaving directory '/home/yyt/Documents/xiyu'

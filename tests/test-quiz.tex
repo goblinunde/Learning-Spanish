@@ -1,0 +1,72 @@
+\documentclass{spanishcards}
+
+\begin{document}
+
+\SpanishCardsSetup{mode=recall,answer-style=lines,hide={}}
+\AddSpanishWord{
+  spanish = {recordar},
+  english = {recallEnglish},
+  chinese = {回忆中文答案},
+  example-es = {Quiero recordar esta palabra.},
+  example-en = {recallExampleEnglish},
+  example-zh = {回忆例句答案}
+}
+\PrintVocabularyCards
+\ClearSpanishWords
+
+\newpage
+\SpanishCardsSetup{mode=quiz-english,answer-style=hidden,hide={}}
+\AddSpanishWord{
+  spanish = {aprender},
+  english = {quizEnglishHidden},
+  chinese = {visibleChinese},
+  example-es = {Quiero aprender español.},
+  example-en = {英语例句隐藏},
+  example-zh = {可见中文例句}
+}
+\PrintVocabularyCards
+\ClearSpanishWords
+
+\newpage
+\SpanishCardsSetup{mode=quiz-chinese,answer-style=lines,hide={}}
+\AddSpanishWord{
+  spanish = {leer},
+  english = {visibleEnglish},
+  chinese = {中文测验隐藏},
+  example-es = {Me gusta leer.},
+  example-en = {Visible English example.},
+  example-zh = {chineseExampleHidden}
+}
+\PrintVocabularyCards
+\ClearSpanishWords
+
+\newpage
+\SpanishCardsSetup{mode=quiz-examples,answer-style=lines,hide={}}
+\AddSpanishWord{
+  spanish = {escribir},
+  english = {to write},
+  chinese = {写作},
+  example-es = {Escribo una carta.},
+  example-en = {exampleEnglishHidden},
+  example-zh = {例句中文隐藏}
+}
+\PrintVocabularyCards
+\ClearSpanishWords
+
+\newpage
+\SpanishCardsSetup{
+  mode=custom,
+  answer-style=hidden,
+  hide={english,example-zh}
+}
+\AddSpanishWord{
+  spanish = {escuchar},
+  english = {customEnglishHidden},
+  chinese = {visibleCustomChinese},
+  example-es = {Escucho música.},
+  example-en = {Visible custom English example.},
+  example-zh = {自定义例句隐藏}
+}
+\PrintVocabularyCards
+
+\end{document}

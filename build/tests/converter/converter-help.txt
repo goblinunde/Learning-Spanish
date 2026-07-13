@@ -1,0 +1,25 @@
+SpanishCards JSON-to-TeX converter
+
+Usage:
+  texlua scripts/json-to-tex.lua --input FILE --output FILE [options]
+
+Required:
+  --input FILE       UTF-8 JSON vocabulary file
+  --output FILE      Destination TeX file
+
+Options:
+  --format FORMAT    fragment or document (default: fragment)
+  --view VIEW        cards or table (default: cards)
+  --help             Show this help
+
+Examples:
+  texlua scripts/json-to-tex.lua \
+    --input data/example.json \
+    --output generated/example.tex \
+    --format fragment
+
+  texlua scripts/json-to-tex.lua \
+    --input data/example.json \
+    --output generated/example-document.tex \
+    --format document \
+    --view table

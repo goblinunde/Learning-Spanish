@@ -1,0 +1,616 @@
+\NeedsTeXFormat{LaTeX2e}[2022-11-01]
+\ProvidesExplPackage
+  {spanishcards}
+  {2026-07-13}
+  {0.1}
+  {Screen-first Spanish vocabulary cards}
+
+\RequirePackage{iftex}
+\ifLuaTeX\else
+  \PackageError{spanishcards}
+    {SpanishCards requires LuaLaTeX}
+    {Compile this document with lualatex or latexmk -lualatex.}
+  \expandafter\endinput
+\fi
+
+\makeatletter
+\@ifclassloaded{ctexart}{}{%
+  \@ifclassloaded{ctexbook}{}{%
+    \@ifclassloaded{ctexrep}{}{%
+      \RequirePackage{ctex}%
+    }%
+  }%
+}
+\makeatother
+\IfFontExistsTF{Noto Sans}{%
+  \newfontfamily\SpanishCardsLatin{Noto Sans}%
+  \newcommand\SpanishCardsSans{\sffamily\SpanishCardsLatin}%
+}{%
+  \IfFontExistsTF{DejaVu Sans}{%
+    \newfontfamily\SpanishCardsLatin{DejaVu Sans}%
+    \newcommand\SpanishCardsSans{\sffamily\SpanishCardsLatin}%
+  }{%
+    \newcommand\SpanishCardsSans{\sffamily}%
+  }%
+}
+\RequirePackage{xcolor}
+\RequirePackage{tcolorbox}
+\RequirePackage{array}
+\RequirePackage{booktabs}
+\RequirePackage{colortbl}
+\RequirePackage{longtable}
+\tcbuselibrary{skins}
+
+\definecolor{SCPageBackground}{HTML}{F7F3EA}
+\definecolor{SCText}{HTML}{24303A}
+\definecolor{SCMuted}{HTML}{66727C}
+\definecolor{SCRed}{HTML}{B83A3A}
+\definecolor{SCRedDark}{HTML}{76272C}
+\definecolor{SCRedLight}{HTML}{F8E5DF}
+\definecolor{SCGold}{HTML}{E6B84A}
+\definecolor{SCBlue}{HTML}{257A9E}
+\definecolor{SCBlueDark}{HTML}{18566F}
+\definecolor{SCBlueLight}{HTML}{E2F2F7}
+\definecolor{SCMint}{HTML}{3E8E7E}
+\definecolor{SCMintDark}{HTML}{265F55}
+\definecolor{SCMintLight}{HTML}{E2F4EF}
+\definecolor{SCOrange}{HTML}{D96C42}
+\definecolor{SCPurple}{HTML}{634A7B}
+\definecolor{SCSunsetLight}{HTML}{FBE9DE}
+
+\colorlet{SCAccent}{SCRed}
+\colorlet{SCAccentDark}{SCRedDark}
+\colorlet{SCAccentLight}{SCRedLight}
+\colorlet{SCSecondary}{SCGold}
+
+\ExplSyntaxOn
+
+\seq_new:N \g__spanishcards_entries_seq
+\tl_new:N \g__spanishcards_theme_tl
+\tl_new:N \g__spanishcards_mode_tl
+\tl_new:N \g__spanishcards_answer_style_tl
+\clist_new:N \g__spanishcards_extra_hide_clist
+\bool_new:N \g__spanishcards_show_number_bool
+\bool_new:N \g__spanishcards_data_loaded_bool
+
+\tl_gset:Nn \g__spanishcards_theme_tl { mediterranean }
+\tl_gset:Nn \g__spanishcards_mode_tl { study }
+\tl_gset:Nn \g__spanishcards_answer_style_tl { lines }
+\bool_gset_true:N \g__spanishcards_show_number_bool
+
+\tl_new:N \l__spanishcards_spanish_tl
+\tl_new:N \l__spanishcards_english_tl
+\tl_new:N \l__spanishcards_chinese_tl
+\tl_new:N \l__spanishcards_pos_tl
+\tl_new:N \l__spanishcards_gender_tl
+\tl_new:N \l__spanishcards_pronunciation_tl
+\tl_new:N \l__spanishcards_example_es_tl
+\tl_new:N \l__spanishcards_example_en_tl
+\tl_new:N \l__spanishcards_example_zh_tl
+\tl_new:N \l__spanishcards_level_tl
+\tl_new:N \l__spanishcards_tags_tl
+\tl_new:N \l__spanishcards_color_tl
+\tl_new:N \l__spanishcards_source_tl
+\tl_new:N \l__spanishcards_record_tl
+\clist_new:N \l__spanishcards_active_hide_clist
+\tl_new:N \l__spanishcards_table_rows_tl
+
+\msg_new:nnn { spanishcards } { missing-spanish }
+  { Skipping~vocabulary~entry~#1~because~the~Spanish~field~is~empty. }
+\msg_new:nnn { spanishcards } { empty-library }
+  { The~vocabulary~library~is~empty. }
+
+\keys_define:nn { spanishcards / setup }
+  {
+    theme .choice:,
+    theme / mediterranean .code:n =
+      { \tl_gset:Nn \g__spanishcards_theme_tl { mediterranean } },
+    theme / ocean .code:n =
+      { \tl_gset:Nn \g__spanishcards_theme_tl { ocean } },
+    theme / mint .code:n =
+      { \tl_gset:Nn \g__spanishcards_theme_tl { mint } },
+    theme / sunset .code:n =
+      { \tl_gset:Nn \g__spanishcards_theme_tl { sunset } },
+    mode .choice:,
+    mode / study .code:n =
+      { \tl_gset:Nn \g__spanishcards_mode_tl { study } },
+    mode / recall .code:n =
+      { \tl_gset:Nn \g__spanishcards_mode_tl { recall } },
+    mode / quiz-english .code:n =
+      { \tl_gset:Nn \g__spanishcards_mode_tl { quiz-english } },
+    mode / quiz-chinese .code:n =
+      { \tl_gset:Nn \g__spanishcards_mode_tl { quiz-chinese } },
+    mode / quiz-examples .code:n =
+      { \tl_gset:Nn \g__spanishcards_mode_tl { quiz-examples } },
+    mode / custom .code:n =
+      { \tl_gset:Nn \g__spanishcards_mode_tl { custom } },
+    answer-style .choice:,
+    answer-style / hidden .code:n =
+      { \tl_gset:Nn \g__spanishcards_answer_style_tl { hidden } },
+    answer-style / lines .code:n =
+      { \tl_gset:Nn \g__spanishcards_answer_style_tl { lines } },
+    hide .clist_gset:N = \g__spanishcards_extra_hide_clist,
+    show-card-number .bool_gset:N = \g__spanishcards_show_number_bool,
+  }
+
+\keys_define:nn { spanishcards / entry }
+  {
+    spanish .tl_set:N = \l__spanishcards_spanish_tl,
+    english .tl_set:N = \l__spanishcards_english_tl,
+    chinese .tl_set:N = \l__spanishcards_chinese_tl,
+    pos .tl_set:N = \l__spanishcards_pos_tl,
+    gender .tl_set:N = \l__spanishcards_gender_tl,
+    pronunciation .tl_set:N = \l__spanishcards_pronunciation_tl,
+    example-es .tl_set:N = \l__spanishcards_example_es_tl,
+    example-en .tl_set:N = \l__spanishcards_example_en_tl,
+    example-zh .tl_set:N = \l__spanishcards_example_zh_tl,
+    level .tl_set:N = \l__spanishcards_level_tl,
+    tags .tl_set:N = \l__spanishcards_tags_tl,
+    color .tl_set:N = \l__spanishcards_color_tl,
+    source .tl_set:N = \l__spanishcards_source_tl,
+    record .tl_set:N = \l__spanishcards_record_tl,
+  }
+
+\cs_new_protected:Npn \__spanishcards_entry_reset:
+  {
+    \tl_clear:N \l__spanishcards_spanish_tl
+    \tl_clear:N \l__spanishcards_english_tl
+    \tl_clear:N \l__spanishcards_chinese_tl
+    \tl_clear:N \l__spanishcards_pos_tl
+    \tl_clear:N \l__spanishcards_gender_tl
+    \tl_clear:N \l__spanishcards_pronunciation_tl
+    \tl_clear:N \l__spanishcards_example_es_tl
+    \tl_clear:N \l__spanishcards_example_en_tl
+    \tl_clear:N \l__spanishcards_example_zh_tl
+    \tl_clear:N \l__spanishcards_level_tl
+    \tl_clear:N \l__spanishcards_tags_tl
+    \tl_clear:N \l__spanishcards_color_tl
+    \tl_set:Nn \l__spanishcards_source_tl { manual }
+    \tl_clear:N \l__spanishcards_record_tl
+  }
+
+\cs_new_protected:Npn \__spanishcards_compute_hidden_fields:
+  {
+    \clist_set_eq:NN
+      \l__spanishcards_active_hide_clist
+      \g__spanishcards_extra_hide_clist
+    \tl_if_eq:VnT \g__spanishcards_mode_tl { recall }
+      {
+        \clist_put_right:Nn \l__spanishcards_active_hide_clist
+          { english, chinese, example-en, example-zh }
+      }
+    \tl_if_eq:VnT \g__spanishcards_mode_tl { quiz-english }
+      {
+        \clist_put_right:Nn \l__spanishcards_active_hide_clist
+          { english, example-en }
+      }
+    \tl_if_eq:VnT \g__spanishcards_mode_tl { quiz-chinese }
+      {
+        \clist_put_right:Nn \l__spanishcards_active_hide_clist
+          { chinese, example-zh }
+      }
+    \tl_if_eq:VnT \g__spanishcards_mode_tl { quiz-examples }
+      {
+        \clist_put_right:Nn \l__spanishcards_active_hide_clist
+          { example-en, example-zh }
+      }
+  }
+
+\cs_new_protected:Npn \__spanishcards_answer_placeholder:
+  {
+    \tl_if_eq:VnTF \g__spanishcards_answer_style_tl { hidden }
+      { \rule{0pt}{1.4\baselineskip} }
+      {
+        \raisebox{0.5ex}{\rule{0.86\linewidth}{0.45pt}}
+        \rule{0pt}{1.4\baselineskip}
+      }
+  }
+
+\cs_new_protected:Npn \__spanishcards_field_content:nn #1#2
+  {
+    \clist_if_in:NnTF \l__spanishcards_active_hide_clist {#1}
+      { \__spanishcards_answer_placeholder: }
+      {
+        \tl_if_blank:nTF {#2}
+          { {\color{SCMuted}---} }
+          {#2}
+      }
+  }
+
+\cs_generate_variant:Nn \__spanishcards_field_content:nn { nV }
+
+\cs_new_protected:Npn \__spanishcards_apply_theme:n #1
+  {
+    \str_case:nnF {#1}
+      {
+        { mediterranean }
+          {
+            \colorlet{SCAccent}{SCRed}
+            \colorlet{SCAccentDark}{SCRedDark}
+            \colorlet{SCAccentLight}{SCRedLight}
+            \colorlet{SCSecondary}{SCGold}
+          }
+        { ocean }
+          {
+            \colorlet{SCAccent}{SCBlue}
+            \colorlet{SCAccentDark}{SCBlueDark}
+            \colorlet{SCAccentLight}{SCBlueLight}
+            \colorlet{SCSecondary}{SCMint}
+          }
+        { mint }
+          {
+            \colorlet{SCAccent}{SCMint}
+            \colorlet{SCAccentDark}{SCMintDark}
+            \colorlet{SCAccentLight}{SCMintLight}
+            \colorlet{SCSecondary}{SCBlue}
+          }
+        { sunset }
+          {
+            \colorlet{SCAccent}{SCOrange}
+            \colorlet{SCAccentDark}{SCPurple}
+            \colorlet{SCAccentLight}{SCSunsetLight}
+            \colorlet{SCSecondary}{SCGold}
+          }
+      }
+      { \__spanishcards_apply_theme:n { mediterranean } }
+  }
+
+\cs_generate_variant:Nn \__spanishcards_apply_theme:n { V }
+
+\cs_new_protected:Npn \__spanishcards_ensure_data_module:
+  {
+    \bool_if:NF \g__spanishcards_data_loaded_bool
+      {
+        \directlua{spanishcards_data=dofile(assert(
+          kpse.find_file("spanishcards-data.lua"),
+          "SpanishCards data module not found"
+        ))}
+        \bool_gset_true:N \g__spanishcards_data_loaded_bool
+      }
+  }
+
+\cs_new_protected:Npn \__spanishcards_badge:n #1
+  {
+    \tcbox[
+      on~line,
+      boxrule=0pt,
+      arc=2mm,
+      left=2mm,
+      right=2mm,
+      top=0.6mm,
+      bottom=0.6mm,
+      colback=SCAccentLight,
+      coltext=SCAccentDark
+    ]{\SpanishCardsSans\scriptsize\bfseries #1}
+  }
+
+\cs_new_protected:Npn \__spanishcards_meta_item:nn #1#2
+  {
+    \tl_if_blank:nF {#2}
+      {
+        {\SpanishCardsSans\scriptsize\bfseries\color{SCMuted} #1}\par
+        \vspace{0.3mm}
+        {\SpanishCardsSans\small\color{SCText} #2}
+      }
+  }
+
+\cs_generate_variant:Nn \__spanishcards_meta_item:nn { nV }
+
+\cs_new_protected:Npn \__spanishcards_translation_panel:nnnn #1#2#3#4
+  {
+    \begin{tcolorbox}[
+      enhanced,
+      boxrule=0pt,
+      arc=2.5mm,
+      colback=#4,
+      left=3mm,
+      right=3mm,
+      top=2mm,
+      bottom=2mm,
+      height=18mm,
+      valign=center,
+      before~skip=0pt,
+      after~skip=0pt
+    ]
+      {\SpanishCardsSans\scriptsize\bfseries\color{SCMuted} #1}\par
+      \vspace{0.7mm}
+      {\SpanishCardsSans\large\bfseries\color{SCText}
+        \__spanishcards_field_content:nn {#2} {#3}}
+    \end{tcolorbox}
+  }
+
+\cs_generate_variant:Nn \__spanishcards_translation_panel:nnnn { nnVn }
+
+\cs_new_protected:Npn \__spanishcards_table_field:nn #1#2
+  {
+    \group_begin:
+      \__spanishcards_entry_reset:
+      \keys_set:nn { spanishcards / entry } {#1}
+      \__spanishcards_compute_hidden_fields:
+      \str_case:nnF {#2}
+        {
+          { spanish }
+            { \textbf{\l__spanishcards_spanish_tl} }
+          { english }
+            {
+              \__spanishcards_field_content:nV
+                { english } \l__spanishcards_english_tl
+            }
+          { chinese }
+            {
+              \__spanishcards_field_content:nV
+                { chinese } \l__spanishcards_chinese_tl
+            }
+        }
+        { }
+    \group_end:
+  }
+
+\cs_new_protected:Npn \__spanishcards_table_metadata:n #1
+  {
+    \group_begin:
+      \__spanishcards_entry_reset:
+      \keys_set:nn { spanishcards / entry } {#1}
+      \tl_if_blank:VF \l__spanishcards_pos_tl
+        { \textbf{词性}\enspace\l__spanishcards_pos_tl\quad }
+      \tl_if_blank:VF \l__spanishcards_gender_tl
+        { \textbf{阴阳性}\enspace\l__spanishcards_gender_tl\par }
+      \tl_if_blank:VF \l__spanishcards_pronunciation_tl
+        { \textbf{发音}\enspace\l__spanishcards_pronunciation_tl }
+    \group_end:
+  }
+
+\cs_new_protected:Npn \__spanishcards_table_examples:n #1
+  {
+    \group_begin:
+      \__spanishcards_entry_reset:
+      \keys_set:nn { spanishcards / entry } {#1}
+      \__spanishcards_compute_hidden_fields:
+      \parbox[t]{0.98\textwidth}{
+        \begin{minipage}[t]{0.32\linewidth}
+          \raggedright
+          {\scriptsize\bfseries\color{SCAccentDark} ES}\par
+          \l__spanishcards_example_es_tl
+        \end{minipage}\hfill
+        \begin{minipage}[t]{0.32\linewidth}
+          \raggedright
+          {\scriptsize\bfseries\color{SCAccentDark} EN}\par
+          \__spanishcards_field_content:nV
+            { example-en } \l__spanishcards_example_en_tl
+        \end{minipage}\hfill
+        \begin{minipage}[t]{0.32\linewidth}
+          \raggedright
+          {\scriptsize\bfseries\color{SCAccentDark} 中文}\par
+          \__spanishcards_field_content:nV
+            { example-zh } \l__spanishcards_example_zh_tl
+        \end{minipage}
+      }
+    \group_end:
+  }
+
+\cs_new_protected:Npn \__spanishcards_build_table_rows:
+  {
+    \tl_clear:N \l__spanishcards_table_rows_tl
+    \seq_map_inline:Nn \g__spanishcards_entries_seq
+      {
+        \tl_put_right:Nn \l__spanishcards_table_rows_tl
+          {
+            \__spanishcards_table_field:nn {##1} { spanish } &
+            \__spanishcards_table_field:nn {##1} { english } &
+            \__spanishcards_table_field:nn {##1} { chinese } &
+            \__spanishcards_table_metadata:n {##1}
+            \\
+            \multicolumn{4}{@{}l@{}}
+              { \__spanishcards_table_examples:n {##1} }
+            \\[1.2mm]
+            \arrayrulecolor{SCAccent!25}\midrule
+          }
+      }
+  }
+
+\cs_new_protected:Npn \__spanishcards_render_card:nn #1#2
+  {
+    \group_begin:
+      \__spanishcards_entry_reset:
+      \keys_set:nn { spanishcards / entry } {#2}
+      \__spanishcards_compute_hidden_fields:
+      \tl_if_blank:VTF \l__spanishcards_color_tl
+        { \__spanishcards_apply_theme:V \g__spanishcards_theme_tl }
+        { \__spanishcards_apply_theme:V \l__spanishcards_color_tl }
+      \thispagestyle{empty}
+      \noindent
+      \begin{tcolorbox}[
+        enhanced,
+        width=\linewidth,
+        height=\textheight,
+        boxrule=0.5pt,
+        arc=4mm,
+        colback=white,
+        colframe=SCAccent!35,
+        left=6mm,
+        right=6mm,
+        top=5mm,
+        bottom=4mm,
+        before~skip=0pt,
+        after~skip=0pt,
+        borderline~west={2.2mm}{0pt}{SCAccent},
+        drop~fuzzy~shadow=black!14
+      ]
+        \tl_if_blank:VF \l__spanishcards_level_tl
+          { \__spanishcards_badge:n { \l__spanishcards_level_tl }\hspace{1.5mm} }
+        \tl_if_blank:VF \l__spanishcards_tags_tl
+          { \__spanishcards_badge:n { \l__spanishcards_tags_tl } }
+
+        \par
+        \vspace{1.5mm}
+        {\fontsize{24}{27}\selectfont\SpanishCardsSans\bfseries
+          \color{SCAccentDark}\l__spanishcards_spanish_tl\par}
+        \vspace{1mm}
+
+        \begin{minipage}[t]{0.28\linewidth}
+          \raggedright
+          \__spanishcards_meta_item:nV {词性} \l__spanishcards_pos_tl
+        \end{minipage}\hfill
+        \begin{minipage}[t]{0.18\linewidth}
+          \raggedright
+          \__spanishcards_meta_item:nV {阴阳性} \l__spanishcards_gender_tl
+        \end{minipage}\hfill
+        \begin{minipage}[t]{0.48\linewidth}
+          \raggedright
+          \__spanishcards_meta_item:nV {发音} \l__spanishcards_pronunciation_tl
+        \end{minipage}\par
+
+        \vspace{2mm}
+        \begin{minipage}[t]{0.485\linewidth}
+          \__spanishcards_translation_panel:nnVn
+            {English} {english} \l__spanishcards_english_tl {SCAccentLight}
+        \end{minipage}\hfill
+        \begin{minipage}[t]{0.485\linewidth}
+          \__spanishcards_translation_panel:nnVn
+            {中文} {chinese} \l__spanishcards_chinese_tl
+            {SCAccentLight!62!white}
+        \end{minipage}\par
+
+        \vspace{2mm}
+        \begin{tcolorbox}[
+          enhanced,
+          boxrule=0pt,
+          arc=2.5mm,
+          colback=SCPageBackground!65!white,
+          left=3mm,
+          right=3mm,
+          top=2mm,
+          bottom=2mm,
+          before~skip=0pt,
+          after~skip=0pt
+        ]
+          {\SpanishCardsSans\scriptsize\bfseries\color{SCAccentDark} EJEMPLO}\par
+          {\SpanishCardsSans\normalsize\bfseries\color{SCText}
+            \l__spanishcards_example_es_tl\par}
+          \vspace{0.7mm}
+          {\SpanishCardsSans\small\color{SCMuted}
+            \__spanishcards_field_content:nV
+              {example-en} \l__spanishcards_example_en_tl\par
+            \__spanishcards_field_content:nV
+              {example-zh} \l__spanishcards_example_zh_tl}
+        \end{tcolorbox}
+
+        \vfill
+        \bool_if:NT \g__spanishcards_show_number_bool
+          {
+            \hfill
+            {\SpanishCardsSans\scriptsize\bfseries\color{SCMuted}
+              #1\,/\,\int_to_arabic:n { \seq_count:N \g__spanishcards_entries_seq }}
+          }
+      \end{tcolorbox}
+    \group_end:
+  }
+
+\NewDocumentCommand \SpanishCardsSetup { m }
+  { \keys_set:nn { spanishcards / setup } {#1} }
+
+\NewDocumentCommand \AddSpanishWord { m }
+  {
+    \group_begin:
+      \__spanishcards_entry_reset:
+      \keys_set:nn { spanishcards / entry } {#1}
+      \tl_if_blank:VTF \l__spanishcards_spanish_tl
+        {
+          \msg_warning:nnx { spanishcards } { missing-spanish }
+            { \l__spanishcards_source_tl\c_space_tl\l__spanishcards_record_tl }
+        }
+        { \seq_gput_right:Nn \g__spanishcards_entries_seq {#1} }
+    \group_end:
+  }
+
+\NewDocumentCommand \ClearSpanishWords { }
+  { \seq_gclear:N \g__spanishcards_entries_seq }
+
+\NewDocumentCommand \LoadSpanishCSV { m }
+  {
+    \__spanishcards_ensure_data_module:
+    \directlua{
+      spanishcards_data.load_csv("\luaescapestring{#1}")
+    }
+  }
+
+\NewDocumentCommand \LoadSpanishJSON { m }
+  {
+    \__spanishcards_ensure_data_module:
+    \directlua{
+      spanishcards_data.load_json("\luaescapestring{#1}")
+    }
+  }
+
+\NewDocumentCommand \PrintVocabularyCards { }
+  {
+    \seq_if_empty:NTF \g__spanishcards_entries_seq
+      {
+        \msg_warning:nn { spanishcards } { empty-library }
+        \begin{center}
+          \SpanishCardsSans\color{SCMuted}No~vocabulary~entries~loaded.
+        \end{center}
+      }
+      {
+        \seq_map_indexed_inline:Nn \g__spanishcards_entries_seq
+          {
+            \__spanishcards_render_card:nn {##1} {##2}
+            \int_compare:nNnT
+              {##1} < { \seq_count:N \g__spanishcards_entries_seq }
+              { \newpage }
+          }
+      }
+  }
+
+\NewDocumentCommand \PrintVocabularyTable { }
+  {
+    \seq_if_empty:NTF \g__spanishcards_entries_seq
+      {
+        \msg_warning:nn { spanishcards } { empty-library }
+        \begin{center}
+          \SpanishCardsSans\color{SCMuted}No~vocabulary~entries~loaded.
+        \end{center}
+      }
+      {
+        \clearpage
+        \group_begin:
+          \__spanishcards_apply_theme:V \g__spanishcards_theme_tl
+          \__spanishcards_build_table_rows:
+          \thispagestyle{empty}
+          {\SpanishCardsSans\Large\bfseries\color{SCAccentDark}
+            VOCABULARY~OVERVIEW\par}
+          \vspace{2mm}
+          {\SpanishCardsSans\small
+            \setlength\LTleft{0pt}
+            \setlength\LTright{0pt}
+            \renewcommand\arraystretch{1.18}
+            \begin{longtable}{
+              @{}
+              >{\raggedright\arraybackslash}p{0.22\textwidth}
+              >{\raggedright\arraybackslash}p{0.20\textwidth}
+              >{\raggedright\arraybackslash}p{0.17\textwidth}
+              >{\raggedright\arraybackslash}p{0.31\textwidth}
+              @{}
+            }
+              \rowcolor{SCAccentDark}
+              \color{white}\bfseries Español &
+              \color{white}\bfseries English &
+              \color{white}\bfseries 中文 &
+              \color{white}\bfseries Información
+              \\
+              \endfirsthead
+              \rowcolor{SCAccentDark}
+              \color{white}\bfseries Español &
+              \color{white}\bfseries English &
+              \color{white}\bfseries 中文 &
+              \color{white}\bfseries Información
+              \\
+              \endhead
+              \l__spanishcards_table_rows_tl
+            \end{longtable}
+          }
+        \group_end:
+      }
+  }
+
+\ExplSyntaxOff
