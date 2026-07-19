@@ -17,6 +17,7 @@ SpanishCards 是一个使用 LuaLaTeX 编写的西班牙语词汇学习模块，
 - [JSON 预生成 TeX](#json-预生成-tex)
 - [Makefile 使用方法](#makefile-使用方法)
 - [卡片与表格输出](#卡片与表格输出)
+- [正文课程板块](#正文课程板块)
 - [记忆与测验模式](#记忆与测验模式)
 - [颜色主题](#颜色主题)
 - [字段参考](#字段参考)
@@ -25,7 +26,7 @@ SpanishCards 是一个使用 LuaLaTeX 编写的西班牙语词汇学习模块，
 - [清理构建文件](#清理构建文件)
 - [常见问题](#常见问题)
 - [当前限制](#当前限制)
-- [西语键盘安装](#西语键盘安装)
+- [西语键盘安装与输入教程](#西语键盘安装与输入教程)
 
 ## 功能总览
 
@@ -37,6 +38,7 @@ SpanishCards 是一个使用 LuaLaTeX 编写的西班牙语词汇学习模块，
 | 三语例句 | ✓ | 西语例句及英中翻译 |
 | 一页一词卡片 | ✓ | 默认 160 mm × 100 mm，16:10 |
 | 三语总览表格 | ✓ | 支持自动分页和重复表头 |
+| 正文课程板块 | ✓ | 支持入门讲解、提示、例句和练习页 |
 | 测验模式 | ✓ | 隐藏英文、中文或例句翻译 |
 | 手工词条 | ✓ | 使用 `\AddSpanishWord` |
 | CSV 运行时导入 | ✓ | 编译期间直接读取 CSV |
@@ -121,6 +123,22 @@ mktexlsr ~/texmf
 }
 
 \begin{document}
+
+\SpanishLessonTitle{
+  title = {西班牙语入门},
+  subtitle = {字母、发音与基本问候},
+  goal = {先理解基础知识，再用词卡记忆核心词汇}
+}
+
+\begin{SpanishTheoryBlock}{西班牙语是什么}
+西班牙语使用拉丁字母。入门阶段需要熟悉 ñ、重音元音
+á、é、í、ó、ú，以及倒问号和倒感叹号。
+\end{SpanishTheoryBlock}
+
+\begin{SpanishExampleBlock}{基础问候}
+\SpanishExampleLine{Hola.}{Hello.}{你好。}
+\SpanishExampleLine{Buenos días.}{Good morning.}{早上好。}
+\end{SpanishExampleBlock}
 
 \AddSpanishWord{
   spanish = {la estación},
@@ -451,6 +469,7 @@ LATEXMK=/custom/path/latexmk make pdf
 - `\PrintVocabularyTable`：可跨页的三语总览表格。
 - 打印命令不会消费词库，因此同一数据可以先输出卡片，再输出表格。
 - `\ClearSpanishWords` 清空当前词库。
+- 如果前面已经写了正文课程板块，`\PrintVocabularyCards` 会从新页开始输出词卡。
 
 示例：
 
@@ -461,6 +480,60 @@ LATEXMK=/custom/path/latexmk make pdf
 \SpanishCardsSetup{mode=quiz-english}
 \PrintVocabularyTable
 ```
+
+## 正文课程板块
+
+除了词卡和表格，SpanishCards 也可以写教材式正文。适合放入西语入门知识、发音说明、键盘输入提示、语法规则、三语例句和练习题。正文板块是普通 LaTeX 内容，可以和 `\PrintVocabularyCards` 穿插使用。
+
+标题页：
+
+```latex
+\SpanishLessonTitle{
+  title = {西班牙语入门},
+  subtitle = {字母、发音与基本问候},
+  goal = {认识西语基础字符、问候句和正文学习板块}
+}
+```
+
+常用正文板块：
+
+```latex
+\begin{SpanishTheoryBlock}{西班牙语是什么}
+西班牙语属于罗曼语族，使用拉丁字母书写。初学时最需要熟悉的是
+ñ、重音元音以及倒问号和倒感叹号。
+\end{SpanishTheoryBlock}
+
+\begin{SpanishTipBlock}{输入提示}
+切换到 Spanish (Spain) 键盘后，标准美式键盘上的分号键可以输入 ñ。
+\end{SpanishTipBlock}
+
+\begin{SpanishNoteBlock}{发音提醒}
+西语单词通常按照书写形式发音，重音符号会提示读音重心。
+\end{SpanishNoteBlock}
+
+\begin{SpanishExampleBlock}{基础问候}
+\SpanishExampleLine{Hola.}{Hello.}{你好。}
+\SpanishExampleLine{Buenos días.}{Good morning.}{早上好。}
+\end{SpanishExampleBlock}
+
+\begin{SpanishPracticeBlock}{小练习}
+请写出 Hola、gracias、adiós 的中文意思，并尝试读出每个词。
+\end{SpanishPracticeBlock}
+```
+
+可用接口：
+
+| 命令或环境 | 用途 |
+|---|---|
+| `\SpanishLessonTitle{...}` | 课程标题页，支持 `title`、`subtitle`、`goal` |
+| `SpanishTheoryBlock` | 正文讲解，例如西语基础知识、语法说明 |
+| `SpanishTipBlock` | 技巧提示，例如键盘输入、学习方法 |
+| `SpanishNoteBlock` | 补充说明，例如发音提醒、易错点 |
+| `SpanishExampleBlock` | 例句板块 |
+| `SpanishPracticeBlock` | 练习题或自测任务 |
+| `\SpanishExampleLine{西语}{English}{中文}` | 三语例句行 |
+
+默认页面仍是 160 mm × 100 mm 的横版屏幕尺寸。较长正文建议拆成多个短段落或多个板块；如果要写完整教材章节，可以用普通文档类加载 `spanishcards.sty`，见“单独使用样式包”。
 
 ## 记忆与测验模式
 
@@ -734,140 +807,179 @@ JSON 顶层必须使用方括号：
 
 
 
-# 西语键盘安装
+## 西语键盘安装与输入教程
 
-- [window 安装西语键盘](https://www.fluentu.com/help/zh/%E5%A6%82%E4%BD%95%E5%9C%A8%E6%88%91%E7%9A%84-windows-pc-%E4%B8%8A%E8%AE%BE%E7%BD%AE%E8%A5%BF%E7%8F%AD%E7%89%99%E8%AF%AD%E9%94%AE%E7%9B%98/)
+本项目建议直接在 `.tex`、CSV 和 JSON 中输入 Unicode 西语字符，例如 `ñ`、`á`、`ü`、`¿`、`¡`。LuaLaTeX 可以正常处理 UTF-8 文本，长期维护词库时比反复写 LaTeX 转义命令更直观。
 
-- Linux gnome桌面安装
+如果只是偶尔输入几个字符，可以使用系统自带的符号输入、US International 键盘或 Linux Compose Key；如果会经常录入西语词条，推荐添加西班牙语键盘布局。
 
-  添加西班牙语键盘布局（推荐）
+### 推荐布局选择
 
-  如果你需要大量输入西语，直接添加布局是最符合直觉的：
+| 布局 | 适用场景 | 说明 |
+|---|---|---|
+| `Spanish (Spain)` / `Spanish ISO` | 欧洲西语、完整西班牙本土标点 | 下方映射表以这个布局为基准 |
+| `Spanish (Latin American)` | 拉美西语输入习惯 | 字母和重音输入类似，部分标点和 `AltGr` 位置不同 |
+| `United States-International` / `US International` | 不想改变大多数美式键位 | 通过死键组合输入重音和 `ñ` |
 
-  1. 图形界面操作（以Ubuntu / GNOME为例）
-     - 打开 **设置 (Settings)** -> **区域与语言 (Region & Language)**。
-     - 在“输入源 (Input Sources)”下点击 **+ (添加)** 按钮。
-     - 点击弹出窗口底部的三个点（更多选项），选择“其它 (Other)”，搜索并选择 **Spanish**（推荐选择西班牙语或拉美西语布局）。 
-  2. 快捷键切换
-     - 添加完成后，使用 **Super (Win键) + 空格键** 即可在中文与西语之间快速切换。
-  3. 实体键盘对照
-     - 切换至西语键盘后，若使用标准美式实体键盘，其部分按键映射会改变。例如，**ñ** 键位于分号 `；` 键位，`+` 号键会变为 `¡`。 
+下方“键盘映射”默认场景是：实体键盘是标准美式键盘，但系统输入源已经切换到 `Spanish (Spain)`、`Spanish ISO` 或显示为 `es` 的西语布局。
 
-在 Linux 系统中切换到 **es** 状态后，你使用的是**西班牙（本土）键盘布局 (Spanish - Spain)**。由于标准美式键盘（US Keyboard）的键帽印字与西语映射完全不同，以下是整理出完整、详细的实体键盘按键映射指南。
+### Linux 添加西语键盘
 
-------
+GNOME 桌面：
 
-## 一、 核心特殊字母与变音符号
+1. 打开 **Settings** -> **Keyboard** 或 **Region & Language**。
+2. 在 **Input Sources** 中点击 **+ Add Input Source**。
+3. 搜索并添加 **Spanish**，常用选择是 **Spanish** 或 **Spanish (Latin American)**。
+4. 使用 **Super + Space** 切换到下一个输入源，使用 **Shift + Super + Space** 切回上一个输入源。
+5. 点击顶栏输入源指示器中的 `es`，选择 **View Keyboard Layout** 可以查看当前实时键位图。
 
-| 目标字符                           | 在美式键盘上的输入方法                            | 说明                                               |
-| :--------------------------------- | :------------------------------------------------ | :------------------------------------------------- |
-| **ñ**                              | 直接按 **`;`（分号键）**                          | 对应美式键盘的 `;` 和 `:` 键位                     |
-| **Ñ**                              | 按 **`Shift` + `;`**                              | 大写形式                                           |
-| **变音符号 (´)** *(á, é, í, ó, ú)* | 先按 **`[`（左中括号）**，**松开后**再按对应元音  | 注意：先按死键（Dead Key）不显示，按元音后一起出现 |
-| **大写变音** *(Á, É, Í, Ó, Ú)*     | 先按 **`[`**，**松开后**按 **`Shift` + 对应元音** | 同样适用于大写                                     |
-| **分音符 (¨)** *(ü, ï)*            | 先按 **`Shift` + `[`**，**松开后**再按 `u` 或 `i` | 常见于西语单词如 *cigüeña*                         |
-| **长音符 (`)** *(à, è, ì)*         | 先按 **`]`（右中括号）**，再按对应元音            | 西语较少用，多用于加泰罗尼亚语等                   |
+KDE Plasma 桌面：
 
-------
+1. 打开 **System Settings** -> **Keyboard** -> **Layouts**。
+2. 启用布局配置，点击 **Add**。
+3. 选择 **Spanish** 或 **Spanish (Latin American)**。
+4. 在同一页面设置布局切换快捷键。
 
-## 二、 标点符号与特殊符号映射表
+如果 GNOME 默认列表里看不到某些变体，可以打开终端执行：
 
-西语键盘将数字键的上档键（Shift）以及右侧的大部分标点键进行了重新洗牌，具体映射如下：
+```bash
+gsettings set org.gnome.desktop.input-sources show-all-sources true
+```
 
-### 1. 基础标点与西语专用符号
+### macOS 添加西语键盘
 
-- **倒感叹号 `¡`**：直接按 **`=`（等号键）**
-- **正感叹号 `!`**：按 **`Shift` + `1`**
-- **倒问号 `¿`**：按 **`Shift` + `=`（等号键）**
-- **正问号 `?`**：按 **`Shift` + `-`（减号键）**
-- **短横线 `-`**：直接按 **`/`（右斜杠键）**
-- **下划线 `_`**：按 **`Shift` + `/`（右斜杠键）**
+1. 打开 **System Settings** -> **Keyboard**。
+2. 在 **Text Input** 区域点击 **Edit**。
+3. 点击 **+**，搜索 **Spanish**。
+4. 常用选择是 **Spanish ISO** 或 **Latin American**，添加后在菜单栏输入法菜单中切换。
+5. 使用 **Control + Space** 切换到上一个输入源，使用 **Control + Option + Space** 切换到下一个输入源。
+6. 在输入法菜单中打开 **Show Keyboard Viewer**，可以看到当前布局在 `Shift`、`Option` 等修饰键下的实际映射。
 
-### 2. 数字键整行映射 (0-9 及对应 Shift 键)
+macOS 的 `Spanish ISO`、`Spanish` 和 `Latin American` 在 `Option` 组合键上可能与 Linux/Windows 略有差异；如果符号位置不一致，以 **Keyboard Viewer** 显示为准。
 
-按下 `Shift` + 对应的数字键，打出的符号如下：
+### Windows 添加西语键盘
 
-- **`Shift` + `1`** = `!`
-- **`Shift` + `2`** = `"` （双引号）
-- **`Shift` + `3`** = `·` （中间圆点，美式键盘的 `#` 变成了中点）
-- **`Shift` + `4`** = `$`
-- **`Shift` + `5`** = `%`
-- **`Shift` + `6`** = `&`
-- **`Shift` + `7`** = `/` （斜杠）
-- **`Shift` + `8`** = `(`
-- **`Shift` + `9`** = `)`
-- **`Shift` + `0`** = `=`
+Windows 11 / Windows 10：
 
-### 3. 键盘右侧及剩余符号映射
+1. 打开 **Start** -> **Settings** -> **Time & language** -> **Language & region**。
+2. 如果还没有西班牙语，先在 **Preferred languages** 中点击 **Add a language**，添加 **Spanish**。
+3. 在语言右侧点击 **...** -> **Language options**。
+4. 在 **Keyboards** 下点击 **Add a keyboard**。
+5. 添加 **Spanish (Spain)**、**Spanish (Latin American)** 或 **United States-International**。
+6. 使用 **Win + Space** 在输入源之间切换；部分环境也可以使用 **Alt + Shift**。
 
-- **冒号 `:`**：按 **`Shift` + `.`（句点键）**
+如果只是想保留英文键盘，但输入西语重音，Windows 上可以优先添加 **United States-International**。
 
-- **分号 `;`**：按 **`Shift` + `,`（逗号键）**
+### 快速输入方法
 
-- 问号/减号位置变动：
+切换到 `Spanish (Spain)` / `Spanish ISO` 后，`ñ` 被直接映射到标准美式键盘的分号键位置：
 
-  - 美式键盘的 `-`（减号）变成了 **`'`（单引号）**
-  - 美式键盘的 `Shift` + `-` 变成了 **`?`（正问号）**
+| 目标字符 | 输入方法 |
+|---|---|
+| `ñ` | 直接按 `;` |
+| `Ñ` | `Shift + ;` |
+| `á é í ó ú` | 先按 `[`，松开后再按对应元音 |
+| `Á É Í Ó Ú` | 先按 `[`，松开后再按 `Shift + 对应元音` |
+| `ü` | 先按 `Shift + [`，松开后再按 `u` |
+| `Ü` | 先按 `Shift + [`，松开后再按 `Shift + u` |
+| `¡` | 直接按 `=`，也就是主键区的 `=` / `+` 键 |
+| `¿` | `Shift + =`，也就是 `Shift` 加主键区的 `=` / `+` 键 |
 
-- **单引号 `'`**：直接按 **`-`（减号键）**
+重音键和分音键是死键：第一次按下时不会立即显示字符，按下后续元音才会组合成 `á`、`ü` 等字符。
 
-- **双引号 `"`**：按 **`Shift` + `2`**
+### 常用键盘映射
 
-- 书名号 `«` 和 `»`
+以下表格以标准美式实体键盘为参照。左列写的是你手上键帽看到的按键，右侧写的是切换到西语布局后实际输入的字符。
 
-  （西语标准书名号）：
+| 美式实体键 | 直接按 | `Shift + 按键` |
+|---|---|---|
+| `;` | `ñ` | `Ñ` |
+| `[` | 死键 `´`，用于 `á é í ó ú` | 死键 `¨`，用于 `ü` |
+| `]` | 死键 grave accent，西语较少用 | 死键 `^`，西语较少用 |
+| `=` | `¡` | `¿` |
+| `-` | `'` | `?` |
+| `/` | `-` | `_` |
+| `,` | `,` | `;` |
+| `.` | `.` | `:` |
+| `1` | `1` | `!` |
+| `2` | `2` | `"` |
+| `3` | `3` | `·` |
+| `4` | `4` | `$` |
+| `5` | `5` | `%` |
+| `6` | `6` | `&` |
+| `7` | `7` | `/` |
+| `8` | `8` | `(` |
+| `9` | `9` | `)` |
+| `0` | `0` | `=` |
 
-  - **`«`**：按 **`AltGr` + `Z`**（在 Linux 中通常是 **右 Alt + Z**）
-  - **`»`**：按 **`AltGr` + `X`**（**右 Alt + X**）
+### 右 Alt / AltGr 常用映射
 
-------
+在 Linux 和 Windows 的西语布局中，右侧 `Alt` 通常等同于 `AltGr`。按住 **右 Alt** 再按下列按键，可以输入第三层符号：
 
-## 三、 通过右 Alt 键 (AltGr) 输入的三级符号
+| 输入方法 | 字符 |
+|---|---|
+| `AltGr + 1` | `\|` |
+| `AltGr + 2` | `@` |
+| `AltGr + 3` | `#` |
+| `AltGr + 4` | `~` |
+| `AltGr + 5` | `€` |
+| `AltGr + 6` | `¬` |
+| `AltGr + [` | `[` |
+| `AltGr + ]` | `]` |
+| `AltGr + ;` | `^` |
+| `AltGr + z` | `«` |
+| `AltGr + x` | `»` |
 
-西语布局充分利用了键盘右侧的 `Alt` 键（在欧语键盘中被称为 `AltGr`）。按住 **右 Alt 键** 不放，再按以下键位，可以打出高阶符号：
+在 macOS 上，第三层符号通常通过 `Option` 输入，但具体位置取决于所选输入源和实体键盘类型。建议打开 **Keyboard Viewer** 对照。
 
-- **右 Alt + `1`** = `|` （竖线）
-- **右 Alt + `2`** = `@` （**电子邮箱 @ 符在这里！**）
-- **右 Alt + `3`** = `#`
-- **右 Alt + `4`** = `~` （波浪号）
-- **右 Alt + `5`** = `€` （欧元符号）
-- **右 Alt + `6`** = `¬`
-- **右 Alt + `[`** = `[` （打出原本的左中括号）
-- **右 Alt + `]`** = `]` （打出原本的右中括号）
-- **右 Alt + `;`** = `^` （脱字符）
+### 使用 US International 键盘
 
-------
+如果不想切换到完整西语键盘，可以添加 **US International**。它保留大部分美式键盘习惯，通过死键组合输入西语字符：
 
-## 💡 独家技巧：如何在 Linux 中直接查看实时映射图？
+| 目标字符 | 输入方法 |
+|---|---|
+| `á é í ó ú` | 先按 `'`，再按对应元音 |
+| `Á É Í Ó Ú` | 先按 `'`，再按 `Shift + 对应元音` |
+| `ñ` | 先按 `~`，再按 `n` |
+| `Ñ` | 先按 `~`，再按 `Shift + n` |
+| `ü` | 先按 `"`，再按 `u` |
+| `Ü` | 先按 `"`，再按 `Shift + u` |
 
-如果你经常忘记键位，可以在 Linux (GNOME) 桌面中直接调出**可视化键盘布局图**：
+US International 中 `'`、`"`、`~` 是死键。如果想输入这些符号本身，通常需要按该符号后再按空格。
 
-1. 点击系统右上角的 **es** 图标。
-2. 在下拉菜单中点击 **"View Layout"（查看布局）** 或 **"Show Keyboard Layout"**。
-3. 屏幕上会弹出一个虚拟键盘，它会清晰地标注当前每一个物理按键对应的西语符号，非常方便对照。
+### Linux Compose Key 备选方案
 
+Linux 用户也可以设置 Compose Key，把一个不常用按键设为组合键，例如 `Caps Lock` 或右 `Alt`：
 
+| 目标字符 | 输入方法 |
+|---|---|
+| `ñ` | `Compose` -> `~` -> `n` |
+| `Ñ` | `Compose` -> `~` -> `N` |
+| `á` | `Compose` -> `'` -> `a` |
+| `ü` | `Compose` -> `"` -> `u` |
+| `¿` | `Compose` -> `?` -> `?` |
+| `¡` | `Compose` -> `!` -> `!` |
 
-如果你习惯使用美式键盘，可以通过组合键快速打出西语特殊字符。
+### 在 SpanishCards 中录入示例
 
-------
+推荐直接输入西语 Unicode 字符：
 
-## 使用“美式国际键盘” (US International)
+```latex
+\AddSpanishWord{
+  spanish = {la cigüeña},
+  english = {stork},
+  chinese = {鹳},
+  pronunciation = {/la siˈɣweɲa/},
+  example-es = {¿Dónde está la cigüeña? ¡Está aquí!},
+  example-en = {Where is the stork? It is here!},
+  example-zh = {鹳在哪里？它在这里！}
+}
+```
 
-如果你不想来回切换输入法，可以添加 **"English (US, intl., with dead keys)"**。这样你可以在保持英文输入习惯的同时，使用组合键打出西语字符： [2, 3, 8] 
+排查输入异常时，先确认当前输入源是不是 `es`，再确认添加的是 `Spanish (Spain)`、`Spanish ISO`、`Spanish (Latin American)` 还是 `US International`。如果 `;` 没有输入 `ñ`，通常是还没有切换到西语 Spain/ISO 布局，或者当前使用的是另一个布局变体。
 
-- **重音字母**：先按单引号 `'`，再按元音字母（例如：`' + e` → `é`）。
-- **Ñ 字符**：先按波浪号 `~`（通常是 Shift + `~` 键），再按 `n` 键（`~ + n` → `ñ`）。
-- **倒问号 (¿)**：使用 `Ctrl + Shift + u`，然后输入 `00bf` 并回车。
-- **倒叹号 (¡)**：使用 `Ctrl + Shift + u`，然后输入 `00a1` 并回车。 [3, 9, 10] 
+官方参考：
 
-------
-
-## 使用组合键 (Compose Key)
-
-大多数Linux发行版都支持强大的 Compose 键功能，让你用简单的逻辑输入特殊字符：
-
-1. 打开设置，在键盘设置中将 **Compose Key** 映射到你不常用的键（如 Caps Lock 或右 Alt 键）。 [11, 12] 
-2. 激活特殊符号：
-   - 输入 ñ：先按 **Compose 键**，再按 `~`，最后按 `n`。
-   - 输入 é：先按 **Compose 键**，再按 `'`（单引号），最后按 `e`。
+- [GNOME: Use alternative keyboard layouts](https://help.gnome.org/gnome-help/keyboard-layouts.html)
+- [Apple: Write in another language on Mac](https://support.apple.com/guide/mac-help/write-in-another-language-on-mac-mchlp1406/mac)
+- [Microsoft: Manage language and keyboard layout settings in Windows](https://support.microsoft.com/en-us/windows/hardware/input-devices/manage-the-language-and-keyboard-input-layout-settings-in-windows)

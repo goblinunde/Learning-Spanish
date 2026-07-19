@@ -39,7 +39,7 @@
 \RequirePackage{booktabs}
 \RequirePackage{colortbl}
 \RequirePackage{longtable}
-\tcbuselibrary{skins}
+\tcbuselibrary{skins,breakable}
 
 \definecolor{SCPageBackground}{HTML}{F7F3EA}
 \definecolor{SCText}{HTML}{24303A}
@@ -92,6 +92,9 @@
 \tl_new:N \l__spanishcards_color_tl
 \tl_new:N \l__spanishcards_source_tl
 \tl_new:N \l__spanishcards_record_tl
+\tl_new:N \l__spanishcards_lesson_title_tl
+\tl_new:N \l__spanishcards_lesson_subtitle_tl
+\tl_new:N \l__spanishcards_lesson_goal_tl
 \clist_new:N \l__spanishcards_active_hide_clist
 \tl_new:N \l__spanishcards_table_rows_tl
 
@@ -151,6 +154,13 @@
     record .tl_set:N = \l__spanishcards_record_tl,
   }
 
+\keys_define:nn { spanishcards / lesson-title }
+  {
+    title .tl_set:N = \l__spanishcards_lesson_title_tl,
+    subtitle .tl_set:N = \l__spanishcards_lesson_subtitle_tl,
+    goal .tl_set:N = \l__spanishcards_lesson_goal_tl,
+  }
+
 \cs_new_protected:Npn \__spanishcards_entry_reset:
   {
     \tl_clear:N \l__spanishcards_spanish_tl
@@ -167,6 +177,13 @@
     \tl_clear:N \l__spanishcards_color_tl
     \tl_set:Nn \l__spanishcards_source_tl { manual }
     \tl_clear:N \l__spanishcards_record_tl
+  }
+
+\cs_new_protected:Npn \__spanishcards_lesson_title_reset:
+  {
+    \tl_clear:N \l__spanishcards_lesson_title_tl
+    \tl_clear:N \l__spanishcards_lesson_subtitle_tl
+    \tl_clear:N \l__spanishcards_lesson_goal_tl
   }
 
 \cs_new_protected:Npn \__spanishcards_compute_hidden_fields:
@@ -320,6 +337,131 @@
   }
 
 \cs_generate_variant:Nn \__spanishcards_translation_panel:nnnn { nnVn }
+
+\cs_new_protected:Npn \__spanishcards_lesson_label:n #1
+  {
+    {\SpanishCardsSans\scriptsize\bfseries\color{SCAccentDark}
+      \tl_upper_case:n {#1}}
+  }
+
+\cs_new_protected:Npn \__spanishcards_lesson_title:n #1
+  {
+    \clearpage
+    \group_begin:
+      \__spanishcards_apply_theme:V \g__spanishcards_theme_tl
+      \__spanishcards_lesson_title_reset:
+      \keys_set:nn { spanishcards / lesson-title } {#1}
+      \thispagestyle{empty}
+      \noindent
+      \begin{tcolorbox}[
+        enhanced,
+        width=\linewidth,
+        height=\textheight,
+        boxrule=0.5pt,
+        arc=4mm,
+        colback=white,
+        colframe=SCAccent!35,
+        left=7mm,
+        right=7mm,
+        top=7mm,
+        bottom=6mm,
+        before~skip=0pt,
+        after~skip=0pt,
+        borderline~west={2.2mm}{0pt}{SCAccent},
+        drop~fuzzy~shadow=black!12
+      ]
+        \__spanishcards_badge:n { LECCION }
+        \vfill
+        {\SpanishCardsSans\fontsize{21}{24}\selectfont\bfseries
+          \color{SCAccentDark}\l__spanishcards_lesson_title_tl\par}
+        \tl_if_blank:VF \l__spanishcards_lesson_subtitle_tl
+          {
+            \vspace{2mm}
+            {\SpanishCardsSans\Large\bfseries\color{SCText}
+              \l__spanishcards_lesson_subtitle_tl\par}
+          }
+        \tl_if_blank:VF \l__spanishcards_lesson_goal_tl
+          {
+            \vspace{4mm}
+            \begin{tcolorbox}[
+              enhanced,
+              boxrule=0pt,
+              arc=2.5mm,
+              colback=SCAccentLight,
+              left=3mm,
+              right=3mm,
+              top=2mm,
+              bottom=2mm,
+              before~skip=0pt,
+              after~skip=0pt
+            ]
+              {\SpanishCardsSans\scriptsize\bfseries\color{SCAccentDark}
+                学习目标}\par
+              \vspace{0.6mm}
+              {\SpanishCardsSans\small\color{SCText}
+                \l__spanishcards_lesson_goal_tl}
+            \end{tcolorbox}
+          }
+        \vfill
+        {\SpanishCardsSans\scriptsize\color{SCMuted}
+          SpanishCards~Lesson~Page}
+      \end{tcolorbox}
+    \group_end:
+    \clearpage
+  }
+
+\cs_new_protected:Npn \__spanishcards_lesson_block_begin:nnn #1#2#3
+  {
+    \par\addvspace{2mm}
+    \group_begin:
+      \__spanishcards_apply_theme:V \g__spanishcards_theme_tl
+      \begin{tcolorbox}[
+        enhanced,
+        breakable,
+        width=\linewidth,
+        boxrule=0.45pt,
+        arc=3mm,
+        colback=#3,
+        colframe=SCAccent!30,
+        left=4mm,
+        right=4mm,
+        top=3mm,
+        bottom=3mm,
+        before~skip=0pt,
+        after~skip=0pt,
+        borderline~west={1.3mm}{0pt}{SCAccent}
+      ]
+        \__spanishcards_lesson_label:n {#1}\par
+        \vspace{0.7mm}
+        {\SpanishCardsSans\large\bfseries\color{SCAccentDark} #2\par}
+        \vspace{1.2mm}
+        \SpanishCardsSans\small\color{SCText}
+        \setlength{\parskip}{0.7mm}
+  }
+
+\cs_new_protected:Npn \__spanishcards_lesson_block_end:
+  {
+      \end{tcolorbox}
+    \group_end:
+    \par\addvspace{2mm}
+  }
+
+\cs_new_protected:Npn \__spanishcards_example_line:nnn #1#2#3
+  {
+    \noindent
+    \begin{tabular}{
+      @{}
+      >{\raggedright\arraybackslash}p{0.32\linewidth}
+      >{\raggedright\arraybackslash}p{0.29\linewidth}
+      >{\raggedright\arraybackslash}p{0.29\linewidth}
+      @{}
+    }
+      {\bfseries\color{SCAccentDark}#1} &
+      {\color{SCText}#2} &
+      {\color{SCMuted}#3}
+    \end{tabular}
+    \par\vspace{0.9mm}
+  }
 
 \cs_new_protected:Npn \__spanishcards_table_field:nn #1#2
   {
@@ -509,6 +651,32 @@
 \NewDocumentCommand \SpanishCardsSetup { m }
   { \keys_set:nn { spanishcards / setup } {#1} }
 
+\NewDocumentCommand \SpanishLessonTitle { m }
+  { \__spanishcards_lesson_title:n {#1} }
+
+\NewDocumentCommand \SpanishExampleLine { m m m }
+  { \__spanishcards_example_line:nnn {#1} {#2} {#3} }
+
+\NewDocumentEnvironment { SpanishTheoryBlock } { m }
+  { \__spanishcards_lesson_block_begin:nnn { TEORIA } {#1} { white } }
+  { \__spanishcards_lesson_block_end: }
+
+\NewDocumentEnvironment { SpanishTipBlock } { m }
+  { \__spanishcards_lesson_block_begin:nnn { CONSEJO } {#1} { SCAccentLight!65!white } }
+  { \__spanishcards_lesson_block_end: }
+
+\NewDocumentEnvironment { SpanishNoteBlock } { m }
+  { \__spanishcards_lesson_block_begin:nnn { NOTA } {#1} { SCPageBackground!70!white } }
+  { \__spanishcards_lesson_block_end: }
+
+\NewDocumentEnvironment { SpanishExampleBlock } { m }
+  { \__spanishcards_lesson_block_begin:nnn { EJEMPLOS } {#1} { SCBlueLight!55!white } }
+  { \__spanishcards_lesson_block_end: }
+
+\NewDocumentEnvironment { SpanishPracticeBlock } { m }
+  { \__spanishcards_lesson_block_begin:nnn { PRACTICA } {#1} { SCMintLight!65!white } }
+  { \__spanishcards_lesson_block_end: }
+
 \NewDocumentCommand \AddSpanishWord { m }
   {
     \group_begin:
@@ -552,6 +720,7 @@
         \end{center}
       }
       {
+        \clearpage
         \seq_map_indexed_inline:Nn \g__spanishcards_entries_seq
           {
             \__spanishcards_render_card:nn {##1} {##2}

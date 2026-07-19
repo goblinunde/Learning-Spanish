@@ -87,6 +87,15 @@ assert_pages() {
     fail "expected $expected pages in $file, got $actual"
 }
 
+assert_min_pages() {
+  local file="$1"
+  local expected="$2"
+  local actual
+  actual="$(pdfinfo "$file" | awk '/^Pages:/ {print $2}')"
+  [[ "$actual" -ge "$expected" ]] || \
+    fail "expected at least $expected pages in $file, got $actual"
+}
+
 test_manual() {
   compile_test manual
   local text="$BUILD/test-manual.txt"
@@ -193,6 +202,27 @@ test_style() {
   assert_contains "$text" '发音'
   assert_contains "$text" '/pɾonunˈsjaɾ/'
   assert_pages "$pdf" 1
+}
+
+test_lesson() {
+  compile_test lesson
+  local text="$BUILD/test-lesson.txt"
+  local pdf="$BUILD/test-lesson.pdf"
+
+  assert_contains "$text" '西班牙语入门'
+  assert_contains "$text" '字母、发音与基本问候'
+  assert_contains "$text" '认识西语基础字符'
+  assert_contains "$text" '西班牙语属于罗曼语族'
+  assert_contains "$text" '输入提示'
+  assert_contains "$text" '发音提醒'
+  assert_contains "$text" '基础问候'
+  assert_contains "$text" 'Hola.'
+  assert_contains "$text" 'Good morning.'
+  assert_contains "$text" '小练习'
+  assert_contains "$text" 'hola'
+  assert_contains "$text" 'hello'
+  assert_contains "$text" '你好'
+  assert_min_pages "$pdf" 2
 }
 
 test_converter() {
@@ -307,6 +337,9 @@ case "$TARGET" in
   style)
     test_style
     ;;
+  lesson)
+    test_lesson
+    ;;
   converter)
     test_converter
     ;;
@@ -317,6 +350,7 @@ case "$TARGET" in
     test_json
     test_table
     test_style
+    test_lesson
     test_converter
     ;;
   *)

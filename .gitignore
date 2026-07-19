@@ -1,0 +1,33 @@
+# Project-generated output
+/build/
+/generated/
+
+# LaTeX intermediate files
+*.aux
+*.bbl
+*.bcf
+*.blg
+*.fdb_latexmk
+*.fls
+*.dvi
+*.idx
+*.ilg
+*.ind
+*.lof
+*.log
+*.lot
+*.nav
+*.out
+*.run.xml
+*.snm
+*.synctex.gz
+*.toc
+*.vrb
+*.xdv
+
+# Editor and operating-system files
+*~
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
